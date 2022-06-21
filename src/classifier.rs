@@ -37,13 +37,13 @@ impl Display for Instruction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.opcode.argument_count {
             1 => {
-                let mut replaced = self.opcode.name.replace("u8", &format!("${:02X}", self.argument));
-                replaced = replaced.replace("i8", &format!("${:02X}", self.argument));
+                let mut replaced = self.opcode.name.replace("u8", &format!("${:02x}", self.argument));
+                replaced = replaced.replace("i8", &format!("${:02x}", self.argument));
                 return write!(f, "{}", replaced);
             },
             2 => {
-                let mut replaced = self.opcode.name.replace("u16", &format!("${:04X}", self.argument));
-                replaced = replaced.replace("i16", &format!("${:04X}", self.argument));
+                let mut replaced = self.opcode.name.replace("u16", &format!("${:04x}", self.argument));
+                replaced = replaced.replace("i16", &format!("${:04x}", self.argument));
                 return write!(f, "{}", replaced);
             },
             _ => write!(f, "{}", self.opcode.name),
@@ -63,8 +63,8 @@ pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &usize) -> Option
         Some(oc) => {            
             let mut argument: u16 = 0;
             for i in 0..oc.argument_count {
-                argument <<= 8;
-                argument |= buffer[*current_byte + i as usize + 1] as u16;
+                argument >>= 8;
+                argument |= (buffer[*current_byte + i as usize + 1] as u16) << 8;
             }
             return Some((
                 Instruction{
