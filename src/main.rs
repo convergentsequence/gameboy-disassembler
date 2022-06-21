@@ -20,8 +20,13 @@ fn main() {
     let mut current_byte = 0usize;
     while current_byte < buffer.len() {
         if let Some((instruction, consumed_bytes)) = classify_intruction(&mut buffer, &current_byte) {
+            let mut hex = "".to_owned();
+            for i in current_byte..=current_byte+consumed_bytes {
+                hex.push_str(&format!("{:02X} ", buffer[i]));
+            }
+
+            println!("{} <=> {}", instruction, hex);
             current_byte += consumed_bytes;
-            println!("{}", instruction);
         }
         current_byte += 1;
     }

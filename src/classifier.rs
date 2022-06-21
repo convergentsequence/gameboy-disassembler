@@ -68,7 +68,6 @@ pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &usize) -> Option
                     1
                 ));
             }
-            
             let mut argument: u16 = 0;
             for i in (1..=oc.argument_count).rev() {
                 argument <<= 8;
