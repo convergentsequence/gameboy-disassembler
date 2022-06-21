@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::opcodes::OPCODES;
+use crate::opcodes::{OPCODES, CB_PREFIXED_OPCODES};
 
 #[derive(Clone)]
 pub struct Opcode  {
@@ -58,7 +58,17 @@ pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &usize) -> Option
         }
     }
     match opcode {
-        Some(oc) => {            
+        Some(oc) => {  
+            if oc.start_byte == 0xCB {
+                return Some((
+                    Instruction{
+                        opcode: CB_PREFIXED_OPCODES[buffer[*current_byte+1] as usize].clone(),
+                        argument: 0,
+                    },
+                    1
+                ));
+            }
+            
             let mut argument: u16 = 0;
             for i in 0..oc.argument_count {
                 argument >>= 8;
