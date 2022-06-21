@@ -17,7 +17,7 @@ pub const OPCODES: &[Opcode] = &[
     opcode!("DEC C", 0xd, 0),
     opcode!("LD C,u8", 0xe, 1),
     opcode!("RRCA", 0xf, 0),
-    opcode!("STOP", 0x10, 0),
+    opcode!("STOP", 0x10, 1),       // Usually stop doesnt consume any arguments but it does skip whatever byte comes after it
     opcode!("LD DE,u16", 0x11, 2),
     opcode!("LD (DE),A", 0x12, 0),
     opcode!("INC DE", 0x13, 0),
