@@ -11,4 +11,6 @@ pub const OPCODES: &[Opcode] = &[
     opcode!("INC B", 0x04),
     opcode!("DEC B", 0x05),
     opcode!("LD B, u8", 0x06, 1),
+    opcode!("RLCA", 0x07),
+    opcode!("LD (u16), SP", 0x08, 2),
 ];
