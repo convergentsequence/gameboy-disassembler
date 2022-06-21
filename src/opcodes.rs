@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::{classifier::Opcode, opcode};
 
 pub const OPCODES: &[Opcode] = &[

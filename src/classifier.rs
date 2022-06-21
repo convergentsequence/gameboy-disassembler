@@ -70,9 +70,9 @@ pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &usize) -> Option
             }
             
             let mut argument: u16 = 0;
-            for i in 0..oc.argument_count {
-                argument >>= 8;
-                argument |= (buffer[*current_byte + i as usize + 1] as u16) << 8;
+            for i in (1..=oc.argument_count).rev() {
+                argument <<= 8;
+                argument |= buffer[*current_byte + i as usize] as u16;        
             }
             return Some((
                 Instruction{
