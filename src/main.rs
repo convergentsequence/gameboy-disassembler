@@ -5,6 +5,7 @@ mod opcodes;
 
 use std::{fs::{File, self}, io::Read};
 
+use classifier::classify_intruction;
 use opcodes::OPCODES;
 
 fn main() {
@@ -21,6 +22,10 @@ fn main() {
 
     let mut current_byte = 0usize;
     while current_byte < buffer.len() {
-        classifier::classify_intruction(&mut buffer, &mut current_byte);
+        if let Some((instruction, consumed_bytes)) = classify_intruction(&mut buffer, &current_byte) {
+            current_byte += consumed_bytes;
+            println!("{}", instruction);
+        }
+        current_byte += 1;
     }
 }

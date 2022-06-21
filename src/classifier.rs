@@ -4,6 +4,7 @@ use std::fmt::Display;
 
 use crate::opcodes::OPCODES;
 
+#[derive(Clone)]
 pub struct Opcode  {
     pub name: &'static str,
     pub start_byte: u8,
@@ -27,18 +28,31 @@ macro_rules! opcode {
     };
 }
 
-enum InstructionArgument {
-    NoArg,
-    OneByte(u8),
-    TwoByte(u16),
-}
-
 pub struct Instruction {
     opcode: Opcode,
-    argument: InstructionArgument,
+    argument: u16,
 }
 
-pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &mut usize){
+impl Display for Instruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.opcode.argument_count {
+            1 => {
+                let mut replaced = self.opcode.name.replace("u8", &format!("${:02X}", self.argument));
+                replaced = replaced.replace("i8", &format!("${:02X}", self.argument));
+                return write!(f, "{}", replaced);
+            },
+            2 => {
+                let mut replaced = self.opcode.name.replace("u16", &format!("${:04X}", self.argument));
+                replaced = replaced.replace("i16", &format!("${:04X}", self.argument));
+                return write!(f, "{}", replaced);
+            },
+            _ => write!(f, "{}", self.opcode.name),
+        }
+        
+    }
+}
+
+pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &usize) -> Option<(Instruction, usize)>{
     let mut opcode: Option<&Opcode> = None;
     for oc in OPCODES.iter() {
         if buffer[*current_byte] == oc.start_byte {
@@ -46,16 +60,22 @@ pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &mut usize){
         }
     }
     match opcode {
-        Some(oc) => {
-            *current_byte += 1 + oc.argument_count as usize;
-            if oc.start_byte == 0xCB {
-                *current_byte += 1;
+        Some(oc) => {            
+            let mut argument: u16 = 0;
+            for i in 0..oc.argument_count {
+                argument <<= 8;
+                argument |= buffer[*current_byte + i as usize + 1] as u16;
             }
-            println!("{}", oc.name);
+            return Some((
+                Instruction{
+                    opcode: oc.clone(),
+                    argument: argument,
+                },
+                oc.argument_count as usize
+            ));
         }
-        None => {
-            *current_byte += 1;
-            println!("Unknown opcode, skipping");
-        }
+        None => {}
     }
+
+    None
 }
