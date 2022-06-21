@@ -1,12 +1,9 @@
-#![allow(unused_variables)]
-
 mod classifier;
 mod opcodes;
 
 use std::{fs::{File, self}, io::Read};
 
 use classifier::classify_intruction;
-use opcodes::OPCODES;
 
 fn main() {
     let target: String = r"E:\gameboy\gameboy-roms\bootrom.gb".to_owned();
