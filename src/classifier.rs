@@ -2,6 +2,8 @@
 
 use std::fmt::Display;
 
+use crate::opcodes::OPCODES;
+
 pub struct Opcode  {
     pub name: &'static str,
     pub start_byte: u8,
@@ -23,13 +25,6 @@ macro_rules! opcode {
             argument_count: $arg_len,
         }
     };
-    ($name:expr, $start_byte:expr) => {
-        Opcode {
-            name: $name,
-            start_byte: $start_byte,
-            argument_count: 0,
-        }
-    };
 }
 
 enum InstructionArgument {
@@ -38,7 +33,29 @@ enum InstructionArgument {
     TwoByte(u16),
 }
 
-struct Instruction {
+pub struct Instruction {
     opcode: Opcode,
     argument: InstructionArgument,
+}
+
+pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &mut usize){
+    let mut opcode: Option<&Opcode> = None;
+    for oc in OPCODES.iter() {
+        if buffer[*current_byte] == oc.start_byte {
+            opcode = Some(oc);
+        }
+    }
+    match opcode {
+        Some(oc) => {
+            *current_byte += 1 + oc.argument_count as usize;
+            if oc.start_byte == 0xCB {
+                *current_byte += 1;
+            }
+            println!("{}", oc.name);
+        }
+        None => {
+            *current_byte += 1;
+            println!("Unknown opcode, skipping");
+        }
+    }
 }
