@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as bs
 
-html_doc = open('opcodes_table.html').read()
+html_doc = open('opcodes_table.htmldata').read()
 
 soup = bs(html_doc, 'html.parser')
 
