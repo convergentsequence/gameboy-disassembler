@@ -3,7 +3,7 @@ mod opcodes;
 
 use std::{fs::{File, self}, io::Read, env};
 
-use classifier::classify_intruction;
+use classifier::classify;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -25,15 +25,11 @@ fn main() {
 
     let mut current_byte = 0usize;
     while current_byte < buffer.len() {
-        if let Some((instruction, consumed_bytes)) = classify_intruction(&mut buffer, &current_byte) {
-            // let mut hex = "".to_owned();
-            // for i in current_byte..=current_byte+consumed_bytes {
-            //     hex.push_str(&format!("{:02X} ", buffer[i]));
-            // }
+        let (instruction, consumed_bytes) = classify(&buffer, &current_byte);
 
-            println!("{}", instruction);
-            current_byte += consumed_bytes;
-        }
+        println!("{}", instruction);
+        current_byte += consumed_bytes;
+
         current_byte += 1;
     }
 }

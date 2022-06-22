@@ -7,6 +7,7 @@ pub struct Opcode  {
     pub name: &'static str,
     pub start_byte: u8,
     pub argument_count: u8,
+    pub cb_prefixed: bool,
 }
 
 impl Display for Opcode {
@@ -22,13 +23,26 @@ macro_rules! opcode {
             name: $name,
             start_byte: $start_byte,
             argument_count: $arg_len,
+            cb_prefixed: false
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! cb_opcode {
+    ($name:expr, $start_byte:expr, $arg_len:expr) => {
+        Opcode {
+            name: $name,
+            start_byte: $start_byte,
+            argument_count: $arg_len,
+            cb_prefixed: true
         }
     };
 }
 
 pub struct Instruction {
-    opcode: Opcode,
-    argument: u16,
+    pub opcode: Opcode,
+    pub argument: u16,
 }
 
 impl Display for Instruction {
@@ -50,39 +64,30 @@ impl Display for Instruction {
     }
 }
 
-pub fn classify_intruction(buffer: &mut Vec<u8>, current_byte: &usize) -> Option<(Instruction, usize)>{
-    let mut opcode: Option<&Opcode> = None;
-    for oc in OPCODES.iter() {
-        if buffer[*current_byte] == oc.start_byte {
-            opcode = Some(oc);
-        }
-    }
-    match opcode {
-        Some(oc) => {  
-            if oc.start_byte == 0xCB {
-                return Some((
-                    Instruction{
-                        opcode: CB_PREFIXED_OPCODES[buffer[*current_byte+1] as usize].clone(),
-                        argument: 0,
-                    },
-                    1
-                ));
-            }
-            let mut argument: u16 = 0;
-            for i in (1..=oc.argument_count).rev() {
-                argument <<= 8;
-                argument |= buffer[*current_byte + i as usize] as u16;        
-            }
-            return Some((
-                Instruction{
-                    opcode: oc.clone(),
-                    argument: argument,
-                },
-                oc.argument_count as usize
-            ));
-        }
-        None => {}
+pub fn classify(buffer: &Vec<u8>, current_byte: &usize) -> (Instruction, usize){
+    let opcode = &OPCODES[buffer[*current_byte] as usize];
+
+    if opcode.start_byte == 0xCB {
+        return (
+            Instruction{
+                opcode: CB_PREFIXED_OPCODES[buffer[*current_byte+1] as usize].clone(),
+                argument: 0,
+            },
+            1
+        );
     }
 
-    None
+    let mut argument: u16 = 0;
+    for i in (1..=opcode.argument_count).rev() {
+        argument <<= 8;
+        argument |= buffer[*current_byte + i as usize] as u16;        
+    }
+
+    return (
+        Instruction{
+            opcode: opcode.clone(),
+            argument: argument,
+        },
+        opcode.argument_count as usize
+    );
 }
