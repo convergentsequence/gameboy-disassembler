@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as bs
 
-html_doc = open('cbopcodes_table.htmldata').read()
+html_doc = open('opcodes_table.htmldata').read()
 
 soup = bs(html_doc, 'html.parser')
 
@@ -11,6 +11,10 @@ output = ""
 for opcode in opcodes:
     start_byte = int(opcode['data-index'])
     start_byte = hex(start_byte)
+
+    if 'unused' in opcode['class']:
+        output += f'opcode!("unknown", {start_byte}, 0),\n'
+        continue
 
     inner = opcode.find('div')
     if inner == None:
